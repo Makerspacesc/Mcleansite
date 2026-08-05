@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0e0f13" />
+  <title>Makerspace — Werkzeuge kurz & klar</title>
+  <meta name="description" content="Minimalistischer Überblick über die Werkzeuge des Makerspace: Was es gibt, wie man es anwendet und was zu beachten ist." />
+  <meta name="color-scheme" content="dark light" />
+
+  <style>
+    /* ============================================================
+       Minimal Makerspace — eine Datei, keine Abhängigkeiten
+       ============================================================ */
+    :root{
+      --bg:#0e0f13; --bg-2:#15171d; --fg:#f4f6fa; --fg-dim:#9aa3b2;
+      --line:rgba(255,255,255,.10); --accent:#5ad1ff; --accent-2:#8b7dff;
+      --danger:#ff8f8f; --maxw:1080px; --ease:cubic-bezier(.22,.9,.28,1);
+    }
+    @media (prefers-color-scheme:light){
+      :root{ --bg:#f7f8fb; --bg-2:#ffffff; --fg:#0f1218; --fg-dim:#5a6474;
+             --line:rgba(10,15,25,.10); --accent:#0b74d6; --accent-2:#6b4dff; --danger:#c0392b; }
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden;
+    }
+    a{color:var(--accent)}
+    ::selection{background:var(--accent);color:var(--bg)}
+
+    /* Scroll-Fortschritt oben */
+    .progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:50;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .1s linear}
+
+    /* sanfter, mitlaufender Farbschimmer im Hintergrund */
+    .aura{position:fixed;inset:0;z-index:-1;pointer-events:none;
+      background:
+        radial-gradient(50vw 40vw at 15% 10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+        radial-gradient(45vw 40vw at 85% 30%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 70%);
+      opacity:.9}
+
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+    /* ---------------- Hero ---------------- */
+    .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;position:relative}
+    .kicker{font-size:.8rem;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:20px}
+    .hero h1{font-size:clamp(2.6rem,9vw,6.2rem);line-height:.98;margin:0;letter-spacing:-.03em;font-weight:800}
+    .hero h1 .line{display:block;overflow:hidden;padding-bottom:.16em;margin-bottom:-.1em}
+    .hero h1 .line span{display:block;transform:translateY(110%);animation:rise .9s var(--ease) forwards}
+    .hero h1 .line:nth-child(2) span{animation-delay:.12s}
+    .hero h1 .line:nth-child(3) span{animation-delay:.24s}
+    @keyframes rise{to{transform:translateY(0)}}
+    .hero p{max-width:52ch;color:var(--fg-dim);font-size:clamp(1rem,2.4vw,1.3rem);margin:28px 0 0;
+      opacity:0;animation:fade .8s var(--ease) .5s forwards}
+    @keyframes fade{to{opacity:1}}
+    .scroll-hint{position:absolute;bottom:28px;left:24px;color:var(--fg-dim);font-size:.85rem;
+      display:flex;align-items:center;gap:10px;opacity:0;animation:fade .8s ease .9s forwards}
+    .scroll-hint .mouse{width:22px;height:34px;border:2px solid var(--fg-dim);border-radius:12px;position:relative}
+    .scroll-hint .mouse::after{content:"";position:absolute;left:50%;top:6px;width:3px;height:6px;border-radius:2px;
+      background:var(--fg-dim);transform:translateX(-50%);animation:wheel 1.5s infinite}
+    @keyframes wheel{0%{opacity:1;top:6px}70%{opacity:0;top:16px}100%{opacity:0}}
+
+    /* ---------------- Intro-Zeile ---------------- */
+    .intro{padding:14vh 0}
+    .intro h2{font-size:clamp(1.5rem,4.5vw,2.6rem);font-weight:700;line-height:1.25;margin:0;letter-spacing:-.02em;max-width:20ch}
+    .intro .dim{color:var(--fg-dim)}
+
+    .cta-row{margin-top:34px}
+    .cta{display:inline-flex;align-items:center;gap:12px;text-decoration:none;font-weight:700;
+      padding:15px 26px;border-radius:999px;color:var(--bg);
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      box-shadow:0 10px 30px color-mix(in srgb,var(--accent) 35%,transparent);
+      transition:transform .25s var(--ease),box-shadow .25s}
+    .cta:hover{transform:translateY(-3px);box-shadow:0 16px 40px color-mix(in srgb,var(--accent) 45%,transparent)}
+    .cta svg{width:20px;height:20px;transition:transform .25s var(--ease)}
+    .cta:hover svg{transform:translateX(4px)}
+
+    /* ---------------- Werkzeug-Karten (kompakt) ---------------- */
+    .tools-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding-top:2vh}
+    @media (max-width:760px){ .tools-grid{grid-template-columns:1fr} }
+    @media (max-width:560px){ body{padding:16px} .card{padding:20px} }
+
+    .card{position:relative;padding:24px;border:1px solid var(--line);border-radius:22px;
+      background:linear-gradient(150deg,var(--bg-2),color-mix(in srgb,var(--bg-2) 40%,transparent));
+      display:flex;flex-direction:column;gap:6px;transition:transform .3s var(--ease),border-color .3s}
+    .card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+    .card .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+    .card .art{width:60px;height:60px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:16px;
+      background:color-mix(in srgb,var(--accent) 12%,transparent);border:1px solid var(--line);color:var(--accent);will-change:transform}
+    .card .art svg{width:32px;height:32px}
+    .card .num{font-size:.82rem;font-weight:700;color:var(--fg-dim);font-variant-numeric:tabular-nums}
+    .card h3{font-size:clamp(1.3rem,3.2vw,1.7rem);margin:0;letter-spacing:-.02em;line-height:1.05;font-weight:800}
+    .card .cat{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700}
+    .card .use{margin:10px 0 0;color:var(--fg)}
+    .card .spec{margin:6px 0 0;color:var(--fg-dim);font-size:.92rem}
+    .card .label{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-dim);font-weight:700;margin:16px 0 8px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{font-size:.85rem;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+    .chip.warn{border-color:color-mix(in srgb,var(--danger) 45%,transparent);color:var(--danger)}
+
+    /* Reveal beim Scrollen */
+    .reveal{opacity:0;transform:translateY(40px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+    .reveal.in{opacity:1;transform:none}
+    .reveal.d1{transition-delay:.06s}.reveal.d2{transition-delay:.12s}.reveal.d3{transition-delay:.18s}
+
+    /* ---------------- Footer ---------------- */
+    footer{border-top:1px solid var(--line);padding:12vh 0 8vh;color:var(--fg-dim)}
+    footer h2{color:var(--fg);font-size:clamp(1.4rem,4vw,2.2rem);margin:0 0 18px;letter-spacing:-.02em}
+    .safe-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:8px 0 30px}
+    .safe-item{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2)}
+    .safe-item b{color:var(--fg);display:block;margin-bottom:4px}
+    .imp{font-size:.9rem;line-height:1.7;padding-top:24px;border-top:1px solid var(--line)}
+
+    @media (prefers-reduced-motion:reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+      .hero h1 .line span{transform:none}
+      .hero p,.scroll-hint{opacity:1}
+      .reveal{opacity:1;transform:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <div class="aura" id="aura" aria-hidden="true"></div>
+
+  <main class="wrap">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="kicker">Makerspace · Peter-Wust-Gymnasium Wittlich</div>
+      <h1>
+        <span class="line"><span>Werkzeuge.</span></span>
+        <span class="line"><span>Kurz erklärt.</span></span>
+        <span class="line"><span>Sicher genutzt.</span></span>
+      </h1>
+      <p>Alles Wesentliche auf einen Blick: welche Geräte es gibt, wofür man sie einsetzt und was du unbedingt beachten musst. Scroll dich durch.</p>
+      <div class="scroll-hint"><span class="mouse"></span> scrollen</div>
+    </header>
+
+    <!-- INTRO -->
+    <section class="intro">
+      <h2 class="reveal">Weniger lesen, <span class="dim">mehr verstehen.</span> Pro Werkzeug nur das Nötige: Anwendung und Sicherheit.</h2>
+      <div class="cta-row reveal d1">
+        <a class="cta" href="bibliothek.html">
+          Zur Geräte-Bibliothek
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="tools-grid" id="tools"></section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div>
+        <h2 class="reveal">Immer, an jedem Gerät</h2>
+        <div class="safe-list" id="rules"></div>
+
+        <div class="imp" id="imp"></div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+  (function(){
+    'use strict';
+
+    /* ---- Impressum (hier bearbeiten) ---- */
+    const IMPRESSUM = {
+      company:'',
+      responsible:'',
+      address:'',
+      email:''
+    };
+
+    /* ---- Icons (selbst erstellte Inline-SVGs) ---- */
+    const I = {
+      laser:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M12 22v-4M4 12H2M22 12h-2M5 5l1.5 1.5M19 5l-1.5 1.5"/><circle cx="12" cy="13" r="3.2"/><path d="M12 16v4"/></svg>',
+      printer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>',
+      cnc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M9 3h6M10.5 9h3l1 6h-5z"/><path d="M4 21h16M7 21v-2M17 21v-2"/></svg>',
+      solder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l9-9M12 12l4-4 4 4-4 4z"/><path d="M8 16l-2 2"/></svg>',
+      hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6-3 3-2-2-8.5 8.5-4-4L11.5 6.5l-2-2z"/></svg>',
+      measure:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v10H3z"/><path d="M7 7v3M11 7v4M15 7v3M19 7v4"/></svg>',
+      saw:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h14l4 4M3 8l2 3 2-3 2 3 2-3 2 3 2-3M3 8v8h6"/></svg>',
+      drill:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h9v5H4zM13 8h4l2-2M8 11v4H6l-1 6h5l-1-6"/></svg>'
+    };
+
+    /* ---- Nur das Nötige pro Werkzeug ---- */
+    const tools = [
+      { icon:'laser', cat:'Fertigung', title:'CO₂ Lasercutter', use:'Schneidet und graviert Holz, Acryl und Leder – präzise für Prototypen und Beschriftungen.', spec:'60 W · Arbeitsfläche 600 × 400 mm', watch:['Schutzbrille','Absaugung an','Kein PVC','Nie unbeaufsichtigt'] },
+      { icon:'printer', cat:'3D-Druck', title:'3D-Drucker (FDM)', use:'Baut Objekte Schicht für Schicht aus Kunststoff – ideal für Gehäuse und Ersatzteile.', spec:'Bauraum 250 × 210 × 210 mm · PLA/PETG', watch:['Heiße Düse','Bei ABS lüften','Druck beobachten'] },
+      { icon:'cnc', cat:'Fertigung', title:'CNC-Fräse', use:'Fräst exakte Formen aus Holz und Kunststoff nach digitalem Plan.', spec:'Arbeitsfläche 600 × 400 mm · 1,5 kW', watch:['Werkstück fest spannen','Absaugung','Keine Handschuhe','Schutzbrille'] },
+      { icon:'solder', cat:'Elektronik', title:'Lötstation', use:'Verbindet Bauteile auf Platinen dauerhaft mit Lötzinn.', spec:'150–480 °C · mit Absaugung', watch:['Heiße Spitze','Absaugung nutzen','Hände danach waschen'] },
+      { icon:'hand', cat:'Handwerk', title:'Handwerkzeuge', use:'Bohren, sägen, feilen, montieren – die Grundausstattung für jeden Aufbau.', spec:'Akku- & Netzgeräte, Handsägen, Feilen', watch:['Schutzbrille','Werkzeug vorher prüfen'] },
+      { icon:'measure', cat:'Messen', title:'Mess- & Prüfgeräte', use:'Multimeter und Messschieber für Kontrolle und Fehlersuche.', spec:'Messschieber 0,01 mm · Multimeter', watch:['Richtig anschließen','Messbereich beachten'] },
+      { icon:'saw', cat:'Fertigung', title:'Bandsäge', use:'Schneidet Konturen und gerade Linien in dickeres Material.', spec:'Schnitthöhe bis 300 mm', watch:['Schutzbrille','Schiebestock','Finger fernhalten'] },
+      { icon:'drill', cat:'Fertigung', title:'Säulenbohrmaschine', use:'Bohrt präzise, senkrechte Löcher in Werkstücke.', spec:'bis 25 mm · stufenlose Drehzahl', watch:['Werkstück spannen','Keine Handschuhe','Späne nicht mit der Hand'] }
+    ];
+
+    const rules = [
+      ['Vor der Nutzung','Sichtprüfung: Kabel, Abdeckungen, Not-Aus.'],
+      ['Schutzausrüstung','Schutzbrille immer; Gehörschutz bei lauten Maschinen.'],
+      ['Keine Handschuhe','Nie an rotierenden Maschinen tragen.'],
+      ['Im Notfall','Not-Aus drücken, Lehrkraft holen, Notruf 112.']
+    ];
+
+    const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+    /* ---- Werkzeuge rendern ---- */
+    document.getElementById('tools').innerHTML = tools.map((t,i)=>`
+      <article class="card reveal ${['','d1','d2'][i%3]}">
+        <div class="top">
+          <div class="art" data-parallax>${I[t.icon]||''}</div>
+          <div class="num">${String(i+1).padStart(2,'0')} / ${String(tools.length).padStart(2,'0')}</div>
+        </div>
+        <div class="cat">${esc(t.cat)}</div>
+        <h3>${esc(t.title)}</h3>
+        <p class="use">${esc(t.use)}</p>
+        <p class="spec">${esc(t.spec)}</p>
+        <div class="label">Beachten</div>
+        <div class="chips">${t.watch.map(w=>`<span class="chip warn">${esc(w)}</span>`).join('')}</div>
+      </article>`).join('');
+
+    document.getElementById('rules').innerHTML = rules.map(([h,d])=>
+      `<div class="safe-item reveal"><b>${esc(h)}</b>${esc(d)}</div>`).join('');
+
+    (function renderImpressum(){
+      const parts = [];
+      if(IMPRESSUM.company) parts.push(esc(IMPRESSUM.company));
+      if(IMPRESSUM.responsible) parts.push('Verantwortlich: ' + esc(IMPRESSUM.responsible));
+      if(IMPRESSUM.address) parts.push(esc(IMPRESSUM.address));
+      if(IMPRESSUM.email) parts.push(`<a href="mailto:${esc(IMPRESSUM.email)}">${esc(IMPRESSUM.email)}</a>`);
+      const head = parts.length
+        ? `<strong>Impressum</strong> · ${parts.join(' · ')}<br>`
+        : `<strong>Impressum</strong>: noch nicht ausgefüllt. Bitte die Angaben im Objekt <code>IMPRESSUM</code> im Code ergänzen.<br>`;
+      document.getElementById('imp').innerHTML = head + 'Diese Seite läuft lokal im Browser und erhebt keine Daten.';
+    })();
+
+    /* ---- Scroll-Reveal ---- */
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold:.15, rootMargin:'0px 0px -8% 0px'});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    /* ---- Scroll-Fortschritt + Parallax (rAF-gedrosselt) ---- */
+    const progress = document.getElementById('progress');
+    const parallax = Array.from(document.querySelectorAll('[data-parallax]'));
+    const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+    let ticking = false;
+
+    function onScroll(){
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(()=>{
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight;
+        progress.style.width = (max>0 ? (h.scrollTop/max*100) : 0) + '%';
+        if(!reduce){
+          const vh = window.innerHeight;
+          parallax.forEach(el=>{
+            const r = el.getBoundingClientRect();
+            const off = ((r.top + r.height/2) - vh/2) / vh; // -1..1
+            el.style.transform = `translateY(${(-off*12).toFixed(1)}px) rotate(${(off*3).toFixed(2)}deg)`;
+          });
+        }
+        ticking = false;
+      });
+    }
+    addEventListener('scroll', onScroll, {passive:true});
+    addEventListener('resize', onScroll, {passive:true});
+    onScroll();
+  })();
+  </script>
+</body>
+</html>
