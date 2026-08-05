@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0e0f13" />
+  <title>Geräte-Bibliothek — Makerspace</title>
+  <meta name="description" content="Bibliothek aller Geräte des Makerspace mit Spezifikationen, Anwendung, Sicherheit, Pflege und Prüfpunkten." />
+  <meta name="color-scheme" content="dark light" />
+  <style>
+    :root{
+      --bg:#0e0f13; --bg-2:#15171d; --card:#171922; --fg:#f4f6fa; --fg-dim:#9aa3b2;
+      --line:rgba(255,255,255,.10); --line-soft:rgba(255,255,255,.06);
+      --accent:#5ad1ff; --accent-2:#8b7dff; --danger:#ff8f8f;
+      --radius:16px; --maxw:1240px; --ease:cubic-bezier(.22,.9,.28,1);
+    }
+    @media (prefers-color-scheme:light){
+      :root{ --bg:#f7f8fb; --bg-2:#ffffff; --card:#ffffff; --fg:#0f1218; --fg-dim:#5a6474;
+             --line:rgba(10,15,25,.12); --line-soft:rgba(10,15,25,.07);
+             --accent:#0b74d6; --accent-2:#6b4dff; --danger:#c0392b; }
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--fg);
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5;
+      padding:24px;display:flex;justify-content:center}
+    a{color:var(--accent)}
+    ::selection{background:var(--accent);color:var(--bg)}
+    .wrap{width:100%;max-width:var(--maxw)}
+
+    header{display:flex;flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:8px}
+    .back{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--fg-dim);font-weight:600;
+      padding:9px 14px;border:1px solid var(--line);border-radius:999px;transition:all .2s var(--ease)}
+    .back:hover{color:var(--fg);border-color:var(--accent);transform:translateX(-2px)}
+    .back svg{width:17px;height:17px}
+    h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:0;letter-spacing:-.02em;font-weight:800}
+    .sub{color:var(--fg-dim);margin:2px 0 0;font-size:.95rem}
+
+    .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:22px 0 6px}
+    .search{position:relative;flex:1;min-width:240px}
+    .search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--fg-dim)}
+    .search input{width:100%;padding:13px 14px 13px 42px;border-radius:999px;border:1px solid var(--line);
+      background:var(--bg-2);color:inherit;font-size:.98rem}
+    .search input:focus{outline:none;border-color:var(--accent)}
+    .filters{display:flex;gap:8px;flex-wrap:wrap}
+    .filter{padding:10px 15px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg-dim);
+      font-weight:600;font-size:.9rem;cursor:pointer;font-family:inherit;transition:all .18s var(--ease)}
+    .filter:hover{color:var(--fg);border-color:var(--accent)}
+    .filter.active{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+
+    .count{color:var(--fg-dim);font-size:.9rem;margin:14px 0 6px}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .card{text-align:left;padding:20px;border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--card);
+      cursor:pointer;display:flex;flex-direction:column;gap:10px;font-family:inherit;color:inherit;
+      transition:transform .25s var(--ease),border-color .25s,box-shadow .25s}
+    .card:hover{transform:translateY(-5px);border-color:color-mix(in srgb,var(--accent) 45%,var(--line));
+      box-shadow:0 18px 40px rgba(0,0,0,.25)}
+    .card:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 40%,transparent)}
+    .card .ic{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+      background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+    .card .ic svg{width:26px;height:26px}
+    .card h3{margin:0;font-size:1.08rem;font-weight:700;letter-spacing:-.01em}
+    .card .intro{margin:0;color:var(--fg-dim);font-size:.92rem}
+    .card .badge{margin-top:auto;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+    mark{background:color-mix(in srgb,var(--accent) 35%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+    .empty{padding:30px;color:var(--fg-dim)}
+
+    /* Reveal */
+    .reveal{opacity:0;transform:translateY(26px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+    .reveal.in{opacity:1;transform:none}
+
+    /* Detail-Overlay */
+    .overlay{position:fixed;inset:0;z-index:60;display:none;align-items:flex-start;justify-content:center;
+      padding:24px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);overflow:auto}
+    .overlay.open{display:flex;animation:fade .25s var(--ease)}
+    @keyframes fade{from{opacity:0}to{opacity:1}}
+    .panel{width:100%;max-width:760px;background:var(--bg-2);border:1px solid var(--line);border-radius:20px;
+      padding:26px;margin:auto 0;animation:pop .3s var(--ease)}
+    @keyframes pop{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+    .panel .head{display:flex;align-items:flex-start;gap:14px}
+    .panel .ic{width:56px;height:56px;flex:none;border-radius:15px;display:flex;align-items:center;justify-content:center;
+      background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+    .panel .ic svg{width:30px;height:30px}
+    .panel h2{margin:0;font-size:1.5rem;letter-spacing:-.02em}
+    .panel .cat{color:var(--accent);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+    .panel .intro{color:var(--fg-dim);margin:6px 0 0}
+    .panel-actions{margin-left:auto;display:flex;gap:8px;flex:none}
+    .print-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:11px;
+      border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;font-family:inherit;
+      font-weight:600;font-size:.9rem;transition:all .18s var(--ease)}
+    .print-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .print-btn svg{width:17px;height:17px}
+    .close{width:40px;height:40px;flex:none;border-radius:11px;border:1px solid var(--line);
+      background:transparent;color:var(--fg);cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center}
+    .close:hover{border-color:var(--accent)}
+    .label{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-dim);font-weight:700;margin:22px 0 8px}
+    .specs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media (max-width:520px){ .specs{grid-template-columns:1fr} }
+    .spec{background:var(--card);border:1px solid var(--line-soft);border-radius:11px;padding:11px 12px}
+    .spec .k{color:var(--fg-dim);font-size:.78rem}
+    .spec .v{font-weight:700;display:block;margin-top:2px}
+    .steps{display:flex;flex-direction:column;gap:9px}
+    .step{display:flex;gap:11px;align-items:flex-start}
+    .step .n{width:28px;height:28px;flex:none;border-radius:8px;display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:.82rem;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+    .step.warn .n{background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger)}
+    .plist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+    .plist li{display:flex;align-items:center;gap:10px;color:var(--fg)}
+    .plist li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+    .p{color:var(--fg);margin:0}
+
+    @media (prefers-reduced-motion:reduce){
+      *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+      .reveal{opacity:1;transform:none}
+    }
+
+    /* ---- Handy-Feinschliff ---- */
+    @media (max-width:560px){
+      body{padding:16px}
+      header{align-items:flex-start}
+      .panel{padding:20px}
+      .overlay{padding:14px}
+    }
+
+    /* ---- Druck: nur das geöffnete Werkzeug ---- */
+    @media print{
+      body.print-tool{
+        padding:0;display:block;background:#fff;
+        --fg:#000;--fg-dim:#333;--bg:#fff;--bg-2:#fff;--card:#fff;
+        --line:#bbb;--line-soft:#ccc;--accent:#000;--accent-2:#000;--danger:#000;
+      }
+      body.print-tool .wrap{display:none}
+      body.print-tool .overlay{position:static;display:block;background:#fff;backdrop-filter:none;padding:0;overflow:visible}
+      body.print-tool .panel{max-width:none;border:none;box-shadow:none;margin:0;padding:0;animation:none}
+      body.print-tool .panel-actions{display:none}
+      body.print-tool .ic{border:1px solid #000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      body.print-tool .step .n{border:1px solid #000}
+      body.print-tool .spec{border:1px solid #bbb}
+      body.print-tool .label{color:#000}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="back" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        Zur Übersicht
+      </a>
+      <div>
+        <h1>Geräte-Bibliothek</h1>
+        <p class="sub">Alle Werkzeuge des Makerspace — mit Anwendung, Sicherheit, Pflege und Prüfpunkten.</p>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="q" type="search" placeholder="Gerät suchen…" autocomplete="off" aria-label="Gerät suchen" />
+      </div>
+      <div class="filters" id="filters"></div>
+    </div>
+
+    <div class="count" id="count" aria-live="polite"></div>
+    <div class="grid" id="grid" aria-live="polite"></div>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="p-title">
+    <div class="panel" id="panel"></div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+    const I = {
+      fabrication:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>',
+      printing:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>',
+      electronics:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>',
+      hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6-3 3-2-2-8.5 8.5-4-4L11.5 6.5l-2-2z"/></svg>',
+      measuring:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v10H3z"/><path d="M7 7v3M11 7v5M15 7v3M19 7v5"/></svg>'
+    };
+    const CATS=[['all','Alle'],['fabrication','Fertigung'],['printing','3D-Druck'],['electronics','Elektronik'],['hand','Handwerk'],['measuring','Messen']];
+    const catLabel=c=>({fabrication:'Fertigung',printing:'3D-Druck',electronics:'Elektronik',hand:'Handwerk',measuring:'Messen'}[c]||'Allgemein');
+
+    const tools = [
+      { id:'lasercutter-60w', title:'CO₂ Lasercutter 60 W', category:'fabrication', intro:'Schneidet & graviert Holz, Acryl, Leder.', specs:{'Leistung':'60 W (CO₂)','Arbeitsfläche':'600 × 400 mm','Max. Holz':'10 mm','Absaugung':'erforderlich'}, usage:'Feinmechanik, Prototypen, Beschriftungen, Modellbau.', safety:['Schutzbrille tragen','Absaugung aktivieren','Kein PVC (giftige Dämpfe!)','Nur nach Einweisung'], care:'Optiken/Spiegel reinigen; Riemenspannung prüfen.', quick:['Material fixieren','Fokus einstellen','Testschnitt','Auftrag starten'], checklist:['Optik prüfen','Riemen kontrollieren','Abluft & Filter prüfen'] },
+      { id:'lasercutter-40w', title:'CO₂ Lasercutter 40 W', category:'fabrication', intro:'Kompakt für kleinere Formate & Gravuren.', specs:{'Leistung':'40 W','Arbeitsfläche':'400 × 300 mm','Absaugung':'erforderlich'}, usage:'Gravuren, Kleinserien, Bastelprojekte.', safety:['Lüftung aktivieren','Material prüfen','Kein PVC'], care:'Linse säubern; Riemen prüfen.', quick:['Probeschnitt','Fokus prüfen','Auftrag starten'], checklist:['Linse reinigen','Abluft testen'] },
+      { id:'3d-prusa', title:'3D-Drucker — Prusa', category:'printing', intro:'FDM-Druck mit beheizter Bauplatte.', specs:{'Bauraum':'250 × 210 × 210 mm','Düse':'0.4 mm','Hotend':'bis 300 °C','Material':'PLA, PETG, ASA'}, usage:'Prototypen, Gehäuse, Ersatzteile.', safety:['Heiße Düse nicht berühren','Druck beaufsichtigen','Bei ABS/ASA lüften'], care:'Düse reinigen; Bett nivellieren; Achsen schmieren.', quick:['Modell slicen','Bett nivellieren','Filament laden','Druck starten'], checklist:['Bett nivellieren','Düse reinigen','Riemen prüfen'] },
+      { id:'3d-creality', title:'3D-Drucker — Creality', category:'printing', intro:'Einsteiger-FDM-Drucker.', specs:{'Bauraum':'220 × 220 × 250 mm','Düse':'0.4 mm','Material':'PLA, PETG'}, usage:'Ersatzteile, Lehrprojekte, erste Drucke.', safety:['Oberflächen heiß','Finger von Achsen fern'], care:'Bett reinigen; Riemen prüfen.', quick:['Slicer prüfen','Druckbett reinigen','Druck starten'], checklist:['Bett reinigen','Riemen prüfen'] },
+      { id:'cnc-compact', title:'CNC-Fräse (Kompakt)', category:'fabrication', intro:'Fräst Holz & Kunststoff nach Plan.', specs:{'Arbeitsfläche':'600 × 400 mm','Spindel':'1.5 kW','Absaugung':'empfohlen'}, usage:'Fräsarbeiten, Gravuren, Schilder.', safety:['Absaugung nutzen','Werkstück fest spannen','Schutzbrille & Gehörschutz','Keine Handschuhe an der Spindel'], care:'Führungen reinigen; Spindel prüfen.', quick:['Werkstück spannen','Nullpunkt setzen','Werkzeug wechseln','Programm starten'], checklist:['Führungen reinigen','Absaugung prüfen','Fräser kontrollieren'] },
+      { id:'cnc-large', title:'CNC-Fräse (Groß)', category:'fabrication', intro:'Für Platten & größere Bauteile.', specs:{'Arbeitsfläche':'1200 × 800 mm','Spindel':'3.0 kW','Absaugung':'erforderlich'}, usage:'Möbelteile, große Schilder, Serienteile.', safety:['Absaugung erforderlich','Werkstück fixieren','Sicherheitsabstand halten'], care:'Führungen ölen; Kühlung prüfen.', quick:['Spannung prüfen','Abdeckung schließen','Programm starten'], checklist:['Führungen ölen','Kühlung prüfen','Not-Aus testen'] },
+      { id:'solder', title:'Lötstationen', category:'electronics', intro:'Verbindet Bauteile mit Lötzinn.', specs:{'Temperatur':'150–480 °C','Leistung':'60 W','Absaugung':'vorhanden'}, usage:'Elektronikmontage, Reparaturen, THT & SMD.', safety:['Absaugung verwenden','Heiße Spitze','Hände danach waschen (Blei)'], care:'Spitzen verzinnen; Entlötpumpe prüfen.', quick:['Absaugung an','Temperatur wählen','Spitze verzinnen','Löten'], checklist:['Spitze verzinnen','Absaugung prüfen','Filter wechseln'] },
+      { id:'esd', title:'ESD-Arbeitsplatz', category:'electronics', intro:'Antistatischer Platz mit Erdung.', specs:{'Erdung':'10 MΩ empfohlen','Matten':'leitfähig','Armband':'vorhanden'}, usage:'SMD-Arbeiten, empfindliche Bauteile.', safety:['ESD-Schutz beachten','Armband tragen'], care:'Erdung prüfen; Matten reinigen.', quick:['Erdung prüfen','Armband anlegen','Matte reinigen'], checklist:['Erdung prüfen','Matte reinigen','Armband testen'] },
+      { id:'filament', title:'Filamentlager & Trocknung', category:'printing', intro:'Trockenlagerung für Filamente.', specs:{'Lagerung':'trocken, < 20 % RH','Trockner':'50–70 °C','Kapazität':'8 Rollen'}, usage:'Filamentpflege, Druckvorbereitung.', safety:['Trockner überwachen','Nicht überhitzen'], care:'In Trockenboxen lagern; Silikagel tauschen.', quick:['Filament prüfen','Trockner einstellen','Rolle lagern'], checklist:['Feuchtigkeit prüfen','Silikagel tauschen'] },
+      { id:'hand', title:'Handwerkzeuge', category:'hand', intro:'Bohren, sägen, feilen, montieren.', specs:{'Bohrmaschinen':'Akku & Netz','Sägen':'Handsäge, Stichsäge','Feilen':'diverse'}, usage:'Zuschneiden, Montage, Nacharbeit.', safety:['Schutzbrille','Handschuhe wo sinnvoll','Werkzeug prüfen'], care:'Klingen schärfen; Griffe & Akkus prüfen.', quick:['Werkzeug wählen','Linie markieren','Arbeiten'], checklist:['Klingen schärfen','Griffe prüfen','Akkus laden'] },
+      { id:'measure', title:'Mess- & Prüfgeräte', category:'measuring', intro:'Kontrolle & Fehlersuche.', specs:{'Multimeter':'U, I, R','Messschieber':'0.01 mm','Prüfung':'Durchgang, Diode'}, usage:'Kalibrierung, Fehlersuche, Qualität.', safety:['Richtig anschließen','Messbereich beachten'], care:'Batterien prüfen; Kalibrierintervalle beachten.', quick:['Gerät prüfen','Messbereich wählen','Messen'], checklist:['Kalibrierung prüfen','Batterie prüfen'] },
+      { id:'clamps', title:'Spannvorrichtungen', category:'hand', intro:'Zwingen, Schraubstöcke, Schnellspanner.', specs:{'Typen':'Schraubstock, Zwingen','Material':'Stahl, Gusseisen'}, usage:'Fixierung bei Sägen, Fräsen, Kleben.', safety:['Sicher spannen','Nicht überdrehen'], care:'Gleitflächen ölen; Backen reinigen.', quick:['Zwinge wählen','Werkstück fixieren','Prüfen'], checklist:['Gleitflächen ölen','Spindel prüfen'] },
+      { id:'vacuum', title:'Vakuumformer', category:'fabrication', intro:'Formt Kunststoffteile per Vakuum.', specs:{'Plattengröße':'600 × 400 mm','Heizung':'regelbar'}, usage:'Gehäuse, Formteile, Verpackungen.', safety:['Heiße Oberflächen','Dämpfe abführen','Handschuhe beim Handling'], care:'Heizelemente prüfen; Pumpe warten.', quick:['Platte zuschneiden','Erwärmen','Formen','Abkühlen'], checklist:['Vakuumpumpe prüfen','Heizung testen'] },
+      { id:'bandsaw', title:'Bandsäge', category:'fabrication', intro:'Kontur- & Geradschnitte.', specs:{'Schnitthöhe':'bis 300 mm','Band':'variabel'}, usage:'Zuschneiden, Konturschnitte.', safety:['Schutzbrille','Bandspannung prüfen','Schiebestock nutzen','Finger fernhalten'], care:'Sägeblatt wechseln; Führungen reinigen.', quick:['Linie markieren','Führung einstellen','Langsam führen'], checklist:['Sägeblatt prüfen','Führung einstellen'] },
+      { id:'drill', title:'Säulenbohrmaschine', category:'fabrication', intro:'Präzise, senkrechte Bohrungen.', specs:{'Bohrbereich':'bis 25 mm','Drehzahl':'stufenlos'}, usage:'Präzisionsbohrungen, Senkungen.', safety:['Werkstück spannen','Schutzbrille','Keine Handschuhe','Späne nicht mit der Hand'], care:'Spannfutter reinigen; Schmierung prüfen.', quick:['Bohrer wählen','Drehzahl einstellen','Bohrtiefe festlegen','Bohren'], checklist:['Spannfutter reinigen','Schmierung prüfen'] }
+    ];
+
+    const $=s=>document.querySelector(s);
+    const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    const norm=s=>(s||'').toString().toLowerCase();
+    let activeCat='all', query='';
+
+    function matches(t,q){
+      if(!q) return true; const ql=q.toLowerCase();
+      if(norm(t.title).includes(ql)||norm(t.intro).includes(ql)||norm(t.usage).includes(ql)||norm(catLabel(t.category)).includes(ql)) return true;
+      for(const k in t.specs){ if(norm(k).includes(ql)||norm(t.specs[k]).includes(ql)) return true; }
+      for(const a of [t.safety,t.quick,t.checklist]) if(a.some(s=>norm(s).includes(ql))) return true;
+      return false;
+    }
+    function hl(text,q){ if(!q) return esc(text); const i=norm(text).indexOf(q.toLowerCase());
+      if(i<0) return esc(text); return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length)); }
+
+    function renderFilters(){
+      $('#filters').innerHTML = CATS.map(([id,l])=>`<button class="filter ${id===activeCat?'active':''}" data-cat="${id}" type="button">${l}</button>`).join('');
+      $('#filters').querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{ activeCat=b.dataset.cat; render(); }));
+    }
+
+    let io=null;
+    function render(){
+      const list = tools.filter(t=>(activeCat==='all'||t.category===activeCat) && matches(t,query));
+      $('#count').textContent = `${list.length} ${list.length===1?'Gerät':'Geräte'}`+(activeCat!=='all'?` · ${catLabel(activeCat)}`:'')+(query?` · „${query}“`:'');
+      const grid=$('#grid');
+      if(!list.length){ grid.innerHTML='<div class="empty">Keine Geräte gefunden.</div>'; return; }
+      grid.innerHTML = list.map(t=>`
+        <button class="card reveal" data-id="${t.id}" type="button">
+          <div class="ic">${I[t.category]||''}</div>
+          <h3>${hl(t.title,query)}</h3>
+          <p class="intro">${hl(t.intro,query)}</p>
+          <span class="badge">${esc(catLabel(t.category))}</span>
+        </button>`).join('');
+      grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',()=>openDetail(c.dataset.id)));
+      // reveal
+      if(io) io.disconnect();
+      io=new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }}),{threshold:.1});
+      grid.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+    }
+
+    function openDetail(id){
+      const t=tools.find(x=>x.id===id); if(!t) return;
+      $('#panel').innerHTML=`
+        <div class="head">
+          <div class="ic">${I[t.category]||''}</div>
+          <div>
+            <div class="cat">${esc(catLabel(t.category))}</div>
+            <h2 id="p-title">${esc(t.title)}</h2>
+            <p class="intro">${esc(t.intro)}</p>
+          </div>
+          <div class="panel-actions">
+            <button class="print-btn" id="print" type="button" title="Diese Werkzeug-Info drucken">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+              Drucken
+            </button>
+            <button class="close" id="close" type="button" aria-label="Schließen">✕</button>
+          </div>
+        </div>
+        <div class="label">Technische Daten</div>
+        <div class="specs">${Object.entries(t.specs).map(([k,v])=>`<div class="spec"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join('')}</div>
+        <div class="label">Anwendung</div>
+        <p class="p">${esc(t.usage)}</p>
+        <div class="label">Sicherheit — unbedingt beachten</div>
+        <div class="steps">${t.safety.map((s,i)=>`<div class="step warn"><div class="n">${i+1}</div><div>${esc(s)}</div></div>`).join('')}</div>
+        <div class="label">Kurzanleitung</div>
+        <div class="steps">${t.quick.map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div>${esc(s)}</div></div>`).join('')}</div>
+        <div class="label">Pflege & Wartung</div>
+        <p class="p">${esc(t.care)}</p>
+        <div class="label">Prüfpunkte</div>
+        <ul class="plist">${t.checklist.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>`;
+      $('#close').addEventListener('click',closeDetail);
+      $('#print').addEventListener('click',printTool);
+      const ov=$('#overlay'); ov.classList.add('open'); document.body.style.overflow='hidden';
+      $('#close').focus();
+    }
+    function closeDetail(){ $('#overlay').classList.remove('open'); document.body.style.overflow=''; }
+    function printTool(){ document.body.classList.add('print-tool'); window.print(); }
+    window.addEventListener('afterprint',()=>document.body.classList.remove('print-tool'));
+
+    $('#overlay').addEventListener('click',e=>{ if(e.target===$('#overlay')) closeDetail(); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
+    $('#q').addEventListener('input',e=>{ query=e.target.value; render(); });
+
+    renderFilters(); render();
+  })();
+  </script>
+</body>
+</html>
