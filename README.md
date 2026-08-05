@@ -1,11 +1,11 @@
 # Makerspace — Werkzeuge kurz & klar (Minimal-Version)
 
 Eine bewusst **minimalistische** Ein-Seiten-Website für den Makerspace am
-Peter-Wust-Gymnasium Wittlich. Sie zeigt nur das Nötigste: **welche Werkzeuge es
+Gymnasium. Sie zeigt nur das Nötigste: **welche Werkzeuge es
 gibt, wofür man sie einsetzt und was zu beachten ist** – als ruhige
 Scroll-Erzählung mit dezenten Effekten.
 
-Abgeleitet vom ausführlichen [Werkzeug-Portal](https://github.com/edtechhackers-agents/makerspace-werkzeug-portal),
+Abgeleitet vom ausführlichen Website-Portal,
 hier aber radikal reduziert: kein Menü, keine Suche, keine Filter – nur Inhalt.
 
 Zwei Dateien, beide eigenständig – keine Build-Tools, keine Abhängigkeiten, kein Server:
@@ -55,8 +55,8 @@ Alle Icons sind selbst erstellte Inline-SVGs; keine Fotos, keine fremden Assets.
 
 ## 📄 Lizenz
 
-MIT – siehe [LICENSE](LICENSE).
+Selbst geschriebene Lizenz. (Nicht unbedingt rechtskraeftig). 
 
 ---
 
-Ein Projekt des Makerspace am Peter-Wust-Gymnasium Wittlich.
+Ein Projekt des Makerspace am Gymnasium. 
