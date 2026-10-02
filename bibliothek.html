@@ -155,6 +155,9 @@
     </header>
 
     <div class="controls">
+      <button id="adminLogin" class="filter">
+  🔒 Admin
+</button>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input id="q" type="search" placeholder="Gerät suchen…" autocomplete="off" aria-label="Gerät suchen" />
@@ -163,6 +166,25 @@
     </div>
 
     <div class="count" id="count" aria-live="polite"></div>
+    <div id="adminPanel" style="display:none; margin:20px 0; padding:20px; border:1px solid var(--line); border-radius:16px;">
+
+  <h3>Neues Gerät hinzufügen</h3>
+
+  <input id="newTitle" placeholder="Gerätename"
+         style="width:100%;padding:10px;margin-bottom:10px;">
+
+  <input id="newCategory" placeholder="Kategorie (z.B. printing)"
+         style="width:100%;padding:10px;margin-bottom:10px;">
+
+  <textarea id="newIntro"
+            placeholder="Kurzbeschreibung"
+            style="width:100%;padding:10px;margin-bottom:10px;height:100px;"></textarea>
+
+  <button id="saveDevice" class="filter">
+    Gerät speichern
+  </button>
+
+</div>
     <div class="grid" id="grid" aria-live="polite"></div>
   </div>
 
@@ -173,6 +195,7 @@
   <script>
   (function(){
     'use strict';
+    const ADMIN_PASSWORD = "MakerSpace-123";
     const I = {
       fabrication:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.7 2.7-2-2 2.7-2.7z"/></svg>',
       printing:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>',
@@ -183,7 +206,9 @@
     const CATS=[['all','Alle'],['fabrication','Fertigung'],['printing','3D-Druck'],['electronics','Elektronik'],['hand','Handwerk'],['measuring','Messen']];
     const catLabel=c=>({fabrication:'Fertigung',printing:'3D-Druck',electronics:'Elektronik',hand:'Handwerk',measuring:'Messen'}[c]||'Allgemein');
 
-    const tools = [];
+    let tools =
+JSON.parse(localStorage.getItem('devices') || '[]');
+
      
     const $=s=>document.querySelector(s);
     const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -267,7 +292,82 @@
     $('#overlay').addEventListener('click',e=>{ if(e.target===$('#overlay')) closeDetail(); });
     document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
     $('#q').addEventListener('input',e=>{ query=e.target.value; render(); });
+document.getElementById('adminLogin')
+.addEventListener('click', () => {
 
+  const pw = prompt('Admin Passwort:');
+
+  if (pw === ADMIN_PASSWORD) {
+
+    document.getElementById('adminPanel')
+      .style.display = 'block';
+
+    alert('Login erfolgreich');
+
+  } else {
+
+    alert('Falsches Passwort');
+  }
+
+});
+    document.getElementById('saveDevice')
+.addEventListener('click', () => {
+
+  const title =
+    document.getElementById('newTitle').value;
+
+  const category =
+    document.getElementById('newCategory').value;
+
+  const intro =
+    document.getElementById('newIntro').value;
+
+  if(!title){
+    alert('Name fehlt');
+    return;
+  }
+
+  const device = {
+
+    id: Date.now().toString(),
+
+    title,
+
+    category,
+
+    intro,
+
+    specs: {
+      'Information':'Noch keine Daten'
+    },
+
+    usage:'',
+
+    safety:[],
+
+    care:'',
+
+    quick:[],
+
+    checklist:[]
+  };
+
+  tools.push(device);
+
+  localStorage.setItem(
+    'devices',
+    JSON.stringify(tools)
+  );
+
+  render();
+
+  document.getElementById('newTitle').value='';
+  document.getElementById('newCategory').value='';
+  document.getElementById('newIntro').value='';
+
+  alert('Gerät gespeichert');
+
+});
     renderFilters(); render();
   })();
   </script>
